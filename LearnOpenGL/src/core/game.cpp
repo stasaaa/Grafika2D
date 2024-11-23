@@ -223,7 +223,8 @@ void Game::Update(float dt)
         const float tolerance = 0.01f;
 
         // Check if the Moon's Y position is near the highest point (with tolerance)
-        if (Moon->Position.y <= RotationCenter.y - (RotationRadius + SUN_SIZE.y) + tolerance) {
+        if (Moon->Position.y <= RotationCenter.y - (RotationRadius + SUN_SIZE.y) + tolerance
+            || Sun->Position.y <= RotationCenter.y - RotationRadius + tolerance) {
             // Stop the Sun and Moon from moving when the Moon is at the top
             SunMoving = false;
         }
@@ -293,7 +294,7 @@ void Game::ProcessInput(float dt, float MouseX, float MouseY)
     {
         float velocity = PLAYER_VELOCITY * dt;
 
-        if (this->Keys[GLFW_KEY_A]) {
+        if (this->Keys[GLFW_KEY_LEFT]) {
             if (Player->Position.x >= 0.0f)
                 Player->Position.x -= velocity;
 
@@ -308,7 +309,7 @@ void Game::ProcessInput(float dt, float MouseX, float MouseY)
             }
         }
 
-        if (this->Keys[GLFW_KEY_D]) {
+        if (this->Keys[GLFW_KEY_RIGHT]) {
             if (Player->Position.x <= this->Width - Player->Size.x)
                 Player->Position.x += velocity;
 
@@ -324,6 +325,10 @@ void Game::ProcessInput(float dt, float MouseX, float MouseY)
         }
 
         if (this->Keys[GLFW_KEY_N] && !(Moon->Position.y <= RotationCenter.y - (RotationRadius + SUN_SIZE.y) + 0.01)) {
+            SunMoving = true;
+        }
+
+        if (this->Keys[GLFW_KEY_D] && (Moon->Position.y <= RotationCenter.y - (RotationRadius + SUN_SIZE.y) + 0.01)) {
             SunMoving = true;
         }
 
