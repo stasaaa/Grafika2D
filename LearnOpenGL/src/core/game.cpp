@@ -12,7 +12,7 @@ SpriteRenderer* MoonRenderer;
 // Initial size of the player paddle
 const glm::vec2 PLAYER_SIZE(60.0f, 100.0f);
 // Initial velocity of the player paddle
-const float PLAYER_VELOCITY(50.0f);
+const float PLAYER_VELOCITY(200.0f);
 
 const glm::vec2 SUN_SIZE(38.0f, 50.0f);
 const float PULSE(2.0f);
@@ -294,7 +294,7 @@ void Game::ProcessInput(float dt, float MouseX, float MouseY)
     {
         float velocity = PLAYER_VELOCITY * dt;
 
-        if (this->Keys[GLFW_KEY_LEFT]) {
+        if (this->Keys[GLFW_KEY_LEFT] && Player->Position.x > 0.0f) {
             if (Player->Position.x >= 0.0f)
                 Player->Position.x -= velocity;
 
@@ -309,7 +309,7 @@ void Game::ProcessInput(float dt, float MouseX, float MouseY)
             }
         }
 
-        if (this->Keys[GLFW_KEY_RIGHT]) {
+        if (this->Keys[GLFW_KEY_RIGHT] && Player->Position.x < this->Width - Player->Size.x) {
             if (Player->Position.x <= this->Width - Player->Size.x)
                 Player->Position.x += velocity;
 
