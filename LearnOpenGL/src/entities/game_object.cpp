@@ -15,6 +15,7 @@ void GameObject::Draw(SpriteRenderer& renderer)
     renderer.DrawSprite(this->Sprite, this->Position, this->Size, this->Alpha ,glm::vec2(0.0f), 
         glm::vec2(1.0f),this->Rotation, this->Color);
 }
+
 bool GameObject::IsClicked(float mouseX, float mouseY) const
 {
     return (mouseX >= this->Position.x &&

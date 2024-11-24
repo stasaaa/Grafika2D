@@ -24,6 +24,8 @@
     <None Include="src\utils\levels\four.lvl" />
     <None Include="shaders\moon.frag" />
     <None Include="shaders\moon.vert" />
+    <None Include="shaders\tree.vert" />
+    <None Include="shaders\tree.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">

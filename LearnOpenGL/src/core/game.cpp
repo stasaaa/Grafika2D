@@ -8,6 +8,7 @@
 SpriteRenderer* Renderer;
 SpriteRenderer* CircleRenderer;
 SpriteRenderer* MoonRenderer;
+SpriteRenderer* TreeShader;
 
 // Initial size of the player paddle
 const glm::vec2 PLAYER_SIZE(60.0f, 100.0f);
@@ -16,6 +17,8 @@ const float PLAYER_VELOCITY(200.0f);
 
 const glm::vec2 SUN_SIZE(38.0f, 50.0f);
 const float PULSE(2.0f);
+
+glm::vec2 TREE_SIZE(300.0f, 400.0f);
 
 bool SunMoving = false;
 float SunAngle = 0.0f;
@@ -41,6 +44,7 @@ const float MIN_TIME_DIFF(7.0f);
 const float CLOUD_VELOCITY(12.0f);
 
 GameObject* Player;
+GameObject* Tree;
 GameObject* Sun;
 GameObject* Moon;
 GameObject* Tint;
@@ -63,6 +67,7 @@ void Game::Init()
     // load shaders
     ResourceManager::LoadShader("shaders/basic.vert", "shaders/basic.frag", nullptr, "sprite");
     ResourceManager::LoadShader("shaders/moon.vert", "shaders/moon.frag", nullptr, "moon");
+    ResourceManager::LoadShader("shaders/tree.vert", "shaders/tree.frag", nullptr, "tree");
     // configure shaders
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->Width),
         static_cast<float>(this->Height), 0.0f, -1.0f, 1.0f);
@@ -75,10 +80,15 @@ void Game::Init()
 
     ResourceManager::GetShader("moon").Use().SetInteger("image", 0);
     ResourceManager::GetShader("moon").SetMatrix4("projection", projection);
-    ResourceManager::GetShader("moon").Use().SetFloat("redProgress", redProgress);
-    ResourceManager::GetShader("moon").Use().SetInteger("direction", 1);
+    ResourceManager::GetShader("moon").SetFloat("redProgress", redProgress);
+    ResourceManager::GetShader("moon").SetInteger("direction", 1);
     Shader moonShader = ResourceManager::GetShader("moon");
     MoonRenderer = new SpriteRenderer(moonShader);
+
+    ResourceManager::GetShader("tree").Use().SetInteger("image", 0);
+    ResourceManager::GetShader("tree").SetMatrix4("projection", projection);
+    Shader treeShader = ResourceManager::GetShader("tree");
+    TreeShader = new SpriteRenderer(treeShader);
 
     // load textures
     ResourceManager::LoadTexture("textures/backgrounds/valley/sky_lightened.png", true, "sky_lightened");
@@ -86,7 +96,7 @@ void Game::Init()
     ResourceManager::LoadTexture("textures/backgrounds/valley/glacial_mountains_lightened.png", true, "mountains");
     ResourceManager::LoadTexture("textures/backgrounds/valley/clouds_mg_3.png", true, "coulds_mg3");
     ResourceManager::LoadTexture("textures/backgrounds/valley/clouds_mg_2.png", true, "coulds_mg2");
-    ResourceManager::LoadTexture("textures/backgrounds/valley/clouds_mg_1.png", true, "coulds_mg1");
+    ResourceManager::LoadTexture("textures/backgrounds/valley/clouds_mg_1_lightened.png", true, "coulds_mg1");
     ResourceManager::LoadTexture("textures/backgrounds/trees.png", true, "trees");
     ResourceManager::LoadTexture("textures/backgrounds/Hills_Layer_05.png", true, "grass");
 
@@ -102,6 +112,9 @@ void Game::Init()
     ResourceManager::LoadTexture("textures/backgrounds/valley/cloud_lonely.png", true, "cloud_loney");
     ResourceManager::LoadTexture("textures/sprites/Owlet_Monster.png", true, "monster");
     ResourceManager::LoadTexture("textures/sprites/Moon_Phase_1.png", true, "moon");
+    ResourceManager::LoadTexture("textures/sprites/apple_tree.png", true, "tree");
+    ResourceManager::LoadTexture("textures/sprites/apple_1.png", true, "apple_1");
+    ResourceManager::LoadTexture("textures/sprites/apple_2.png", true, "apple_2");
     /*ResourceManager::LoadTexture("textures/backgrounds/background.jpg", false, "background");
     ResourceManager::LoadTexture("textures/sprites/awesomeface.png", true, "face");
     ResourceManager::LoadTexture("textures/sprites/block.png", false, "block");
@@ -120,12 +133,16 @@ void Game::Init()
 
     // load player
     glm::vec2 playerPos = glm::vec2(
-        this->Width / 2.0f - PLAYER_SIZE.x / 2.0f,
+        2 * this->Width / 3.0f - PLAYER_SIZE.x / 2.0f,
         this->Height - PLAYER_SIZE.y - this->Height * 0.06f
     );
     Player = new GameObject(playerPos, PLAYER_SIZE, ResourceManager::GetTexture("monster"));
-
     //Sun->Color = glm::vec3(0.5f, 0.61f, 0.97f); -- lepa plava boja
+
+    /*glm::vec2 treeTrunkPos = glm::vec2(
+        this->Width / 3.0f - 50.0f,
+
+    );*/
 
     this->LastCloud = glfwGetTime() - MIN_TIME_DIFF - 1;
     RotationRadius = this->Height / 2.0f ;
@@ -163,6 +180,13 @@ void Game::Init()
     );
     Tint->Position = glm::vec2(0.0f);
     Tint->Color = glm::vec3(1.0f, 0.0f, 0.0f);
+
+    glm::vec2 treeSize = glm::vec2(300.0f, 400.0f);
+    glm::vec2 treePos = glm::vec2(
+        this->Width / 3.0f - treeSize.x / 2.0f,
+        this->Height - this->Height * 0.06 - treeSize.y
+    );
+    Tree = new GameObject(treePos, treeSize, ResourceManager::GetTexture("tree"));
 }
 
 void Game::Update(float dt)
@@ -258,7 +282,7 @@ void Game::Update(float dt)
             cloudTransitionFactor = 0.0f; // Clouds are fully visible and opaque
         }
 
-        isNight = (normalizedSunAngle >= 0.30f && normalizedSunAngle < 0.75f) ? true : false;
+        //isNight = (normalizedSunAngle >= 0.30f && normalizedSunAngle < 0.75f) ? true : false;
 
         CloudColor = glm::mix(glm::vec3(1.0f), glm::vec3(0.5f), cloudTransitionFactor); // Transition from white to gray
         CloudAlpha = glm::mix(1.0f, 0.5f, cloudTransitionFactor); // Semi-transparent
@@ -298,6 +322,10 @@ void Game::ProcessInput(float dt, float MouseX, float MouseY)
             if (Player->Position.x >= 0.0f)
                 Player->Position.x -= velocity;
 
+            Tree->Position.x += 60.0f * dt;
+            for (GameObject& apple : this->Apples) {
+                apple.Position.x += 60.0f * dt;
+            }
             // Update background layers
             for (auto& layer : BackgroundLayers) {
                 layer.position.x -= layer.velocity * dt;
@@ -313,6 +341,10 @@ void Game::ProcessInput(float dt, float MouseX, float MouseY)
             if (Player->Position.x <= this->Width - Player->Size.x)
                 Player->Position.x += velocity;
 
+            Tree->Position.x -= 60.0f * dt;
+            for (GameObject& apple : this->Apples) {
+                apple.Position.x -= 60.0f * dt;
+            }
             // Update background layers
             for (auto& layer : BackgroundLayers) {
                 layer.position.x += layer.velocity * dt;
@@ -342,6 +374,54 @@ void Game::ProcessInput(float dt, float MouseX, float MouseY)
                 ResourceManager::GetShader("moon").Use().SetInteger("direction", 1);
             }
         }
+
+        if (this->Keys[GLFW_KEY_UP] && Tree->Size.y <= this->Height) {
+            Tree->Size.y += 20.0f * dt;
+            Tree->Position.y -= 20.0f * dt;
+
+            for (GameObject& apple : this->Apples) {
+                float appleDistanceFromTop = apple.Position.y - Tree->Position.y;
+                float relativePosition = appleDistanceFromTop / Tree->Size.y;
+
+                apple.Position.y -= (20.0f * dt) * (1.0f - relativePosition);
+            }
+        }
+
+        if (this->Keys[GLFW_KEY_DOWN] && Tree->Size.y >= this->Height - 400.0f) {
+            Tree->Size.y -= 20.0f * dt;
+            Tree->Position.y += 20.0f * dt;
+
+            for (GameObject& apple : this->Apples) {
+                float appleDistanceFromTop = apple.Position.y - Tree->Position.y;
+                float relativePosition = appleDistanceFromTop / Tree->Size.y;
+
+                apple.Position.y += (20.0f * dt) * (1.0f - relativePosition);
+            }
+        }
+
+        if (this->Keys[GLFW_KEY_KP_ADD] && this->Apples.size() < 10) {
+            float canopyTopY = Tree->Position.y;
+            float canopyBottomY = Tree->Position.y + Tree->Size.y * 0.6f;
+            float canopyLeftX = Tree->Position.x;
+            float canopyRightX = Tree->Position.x + Tree->Size.x - 50.0f;
+
+            float appleX = canopyLeftX + static_cast<float>(rand()) / RAND_MAX * (canopyRightX - canopyLeftX);
+            float appleY = canopyTopY + static_cast<float>(rand()) / RAND_MAX * (canopyBottomY - canopyTopY);
+
+            glm::vec2 applePos = glm::vec2(appleX, appleY);
+            glm::vec2 appleSize = glm::vec2(50.0f, 50.0f);
+
+            int appleTextureNumber = getRandomInt(1, 2);
+            std::string appleTexture = "apple_" + std::to_string(appleTextureNumber);
+            GameObject newApple = GameObject(applePos, appleSize, ResourceManager::GetTexture(appleTexture));
+            this->Apples.push_back(newApple);
+
+            this->Keys[GLFW_KEY_KP_ADD] = false;
+        }
+        if (this->Keys[GLFW_KEY_KP_SUBTRACT] && this->Apples.size() > 0) {
+            this->Apples.pop_back();
+            this->Keys[GLFW_KEY_KP_SUBTRACT] = false;
+        }
     }
 }
 
@@ -359,7 +439,6 @@ void Game::Render()
             star.Draw(*CircleRenderer);
         }
 
-        // TODO Sunce i mesec
         //std::cout << "Rendering Sun at position: " << Sun->Position.x << ", " << Sun->Position.y << std::endl;
         Sun->Draw(*CircleRenderer);
         //printf("%f\n", redProgress);
@@ -383,8 +462,8 @@ void Game::Render()
 
         // Draw player and other objects
         Player->Draw(*Renderer);
+        Tree->Draw(*TreeShader);
 
-        texRepeat = glm::vec2(3.0f, 1.0f);
         texOffset = glm::vec2(BackgroundLayers[BackgroundLayers.size() - 1].position.x / this->Width, 0.0f);
         Renderer->DrawSprite(BackgroundLayers[BackgroundLayers.size() - 1].texture,
             glm::vec2(0.0f, 0.0f), glm::vec2(this->Width, this->Height),1.0f, texOffset, texRepeat);
@@ -393,6 +472,10 @@ void Game::Render()
             cloud.Color = CloudColor;
             cloud.Alpha = CloudAlpha;
             cloud.Draw(*Renderer);
+        }
+
+        for (GameObject apple : this->Apples) {
+            apple.Draw(*Renderer);
         }
 
         ResourceManager::GetShader("moon").Use().SetInteger("hasTexture", -1);

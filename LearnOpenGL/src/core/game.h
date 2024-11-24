@@ -36,6 +36,7 @@ public:
     std::vector<GameObject>         Clouds;
     float                           LastCloud;
     std::vector<GameObject>         Stars;
+    std::vector<GameObject>         Apples;
     // constructor/destructor
     Game(unsigned int width, unsigned int height);
     ~Game();
