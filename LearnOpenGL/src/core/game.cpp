@@ -500,6 +500,12 @@ void Game::Render()
         Renderer->DrawSprite(BackgroundLayers[BackgroundLayers.size() - 2].texture,
             glm::vec2(0.0f, 0.0f + this->Height * 0.1), glm::vec2(this->Width, this->Height * 0.9), 1.0f,texOffset, texRepeat);
 
+        for (GameObject& cloud : Clouds) {
+            cloud.Color = CloudColor;
+            cloud.Alpha = CloudAlpha;
+            cloud.Draw(*Renderer);
+        }
+
         // Draw player and other objects
         Player->Draw(*Renderer);
         Tree->Draw(*TreeShader);
@@ -508,11 +514,6 @@ void Game::Render()
         Renderer->DrawSprite(BackgroundLayers[BackgroundLayers.size() - 1].texture,
             glm::vec2(0.0f, 0.0f), glm::vec2(this->Width, this->Height),1.0f, texOffset, texRepeat);
 
-        for (GameObject& cloud : Clouds) {
-            cloud.Color = CloudColor;
-            cloud.Alpha = CloudAlpha;
-            cloud.Draw(*Renderer);
-        }
 
         for (GameObject apple : this->Apples) {
             apple.Draw(*Renderer);
