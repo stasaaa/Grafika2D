@@ -7,7 +7,7 @@ out vec4 FragColor;
 void main() {
     vec4 texColor = texture(texture1, TexCoords);
 
-    if ((texColor.g > 0.41 && texColor.r < 0.55 && texColor.b < 0.30)
+    if ((texColor.g > 0.41 && texColor.r < 0.60 && texColor.b < 0.32)
         && TexCoords.y < 0.75) { 
         texColor.a = 0.5;
     }
