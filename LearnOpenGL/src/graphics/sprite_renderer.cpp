@@ -1,4 +1,5 @@
 #include "sprite_renderer.h"
+#include "../entities/text.h"
 
 #define CRES 30
 

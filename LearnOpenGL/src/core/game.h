@@ -3,8 +3,11 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H 
 
 #include "../entities/game_level.h"
+#include "../entities/characters.h"
 
 // Represents the current state of the game
 enum GameState {
@@ -41,7 +44,7 @@ public:
     Game(unsigned int width, unsigned int height);
     ~Game();
     // initialize game state (load all shaders/textures/levels)
-    void Init();
+    void Init(Characters& textCharacters);
     // game loop
     void ProcessInput(float dt, float MouseX, float MouseY);
     void Update(float dt);

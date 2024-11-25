@@ -24,6 +24,8 @@
     <None Include="shaders\basic.vert" />
     <None Include="shaders\moon.frag" />
     <None Include="shaders\moon.vert" />
+    <None Include="shaders\text.frag" />
+    <None Include="shaders\text.vert" />
     <None Include="shaders\tree.frag" />
     <None Include="shaders\tree.vert" />
     <None Include="src\utils\levels\four.lvl" />
@@ -34,21 +36,27 @@
   <ItemGroup>
     <ClCompile Include="src\core\game.cpp" />
     <ClCompile Include="src\core\resource_manager.cpp" />
+    <ClCompile Include="src\entities\characters.cpp" />
     <ClCompile Include="src\entities\game_level.cpp" />
     <ClCompile Include="src\entities\game_object.cpp" />
+    <ClCompile Include="src\entities\text.cpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\graphics\sprite_renderer.cpp" />
     <ClCompile Include="src\graphics\texture.cpp" />
+    <ClCompile Include="src\graphics\text_renderer.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\game.h" />
     <ClInclude Include="src\core\resource_manager.h" />
+    <ClInclude Include="src\entities\characters.h" />
     <ClInclude Include="src\entities\game_level.h" />
     <ClInclude Include="src\entities\game_object.h" />
+    <ClInclude Include="src\entities\text.h" />
     <ClInclude Include="src\graphics\shader.h" />
     <ClInclude Include="src\graphics\sprite_renderer.h" />
     <ClInclude Include="src\graphics\texture.h" />
+    <ClInclude Include="src\graphics\text_renderer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -150,7 +158,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>freetype\freetype.lib;opengl32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

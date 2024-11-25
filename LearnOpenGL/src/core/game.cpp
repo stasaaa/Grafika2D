@@ -2,8 +2,12 @@
 
 #include "game.h"
 #include "../graphics/sprite_renderer.h"
+#include "../graphics/text_renderer.h"
 #include "resource_manager.h"
 #include <random>
+#include "../entities/characters.h"
+
+TextRenderer* RenderText;
 
 SpriteRenderer* Renderer;
 SpriteRenderer* CircleRenderer;
@@ -62,15 +66,21 @@ Game::~Game()
 
 }
 
-void Game::Init()
+void Game::Init(Characters& textCharacters)
 {
     // load shaders
     ResourceManager::LoadShader("shaders/basic.vert", "shaders/basic.frag", nullptr, "sprite");
     ResourceManager::LoadShader("shaders/moon.vert", "shaders/moon.frag", nullptr, "moon");
     ResourceManager::LoadShader("shaders/tree.vert", "shaders/tree.frag", nullptr, "tree");
+    ResourceManager::LoadShader("shaders/text.vert", "shaders/text.frag", nullptr, "text");
     // configure shaders
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(this->Width),
         static_cast<float>(this->Height), 0.0f, -1.0f, 1.0f);
+
+    ResourceManager::GetShader("text").Use().SetMatrix4("projection", projection);
+    Shader textShader = ResourceManager::GetShader("text");
+    RenderText = new TextRenderer(textShader, textCharacters);
+
     ResourceManager::GetShader("sprite").Use().SetInteger("image", 0);
     ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
     // set render-specific controls
@@ -480,6 +490,8 @@ void Game::Render()
 
         ResourceManager::GetShader("moon").Use().SetInteger("hasTexture", -1);
         Tint->Draw(*MoonRenderer);
+
+        RenderText->RenderText("Staša Radojièiæ RA 62/2021", 25.0f, 45.0f, 0.6f, glm::vec3(0.0f, 0.0f, 0.0f));
     }
 }
 

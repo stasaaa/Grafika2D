@@ -7,6 +7,7 @@
 
 #include "texture.h"
 #include "shader.h"
+#include <map>
 
 
 class SpriteRenderer
@@ -22,9 +23,9 @@ public:
         glm::vec3 color = glm::vec3(1.0f), bool useTexture = true);
 private:
     // Render state
-    Shader       shader;
-    unsigned int quadVAO;
-    bool         isCircle;
+    Shader                          shader;
+    unsigned int                    quadVAO;
+    bool                            isCircle;
     // Initializes and configures the quad's buffer and vertex attributes
     void initRenderData();
 };
