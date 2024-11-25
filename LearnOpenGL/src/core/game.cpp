@@ -14,6 +14,14 @@ SpriteRenderer* CircleRenderer;
 SpriteRenderer* MoonRenderer;
 SpriteRenderer* TreeShader;
 
+const std::wstring Name(L"Staša Radojičić RA 62/2021");
+std::wstring NameOutput(L"");
+const float typeSpeed(0.2f);
+float typing(0.0f);
+float textLenght(0.0f);
+float textAlpha(1.0f);
+bool loopTextAnimation(false);
+
 // Initial size of the player paddle
 const glm::vec2 PLAYER_SIZE(60.0f, 100.0f);
 // Initial velocity of the player paddle
@@ -78,6 +86,7 @@ void Game::Init(Characters& textCharacters)
         static_cast<float>(this->Height), 0.0f, -1.0f, 1.0f);
 
     ResourceManager::GetShader("text").Use().SetMatrix4("projection", projection);
+    ResourceManager::GetShader("text").Use().SetFloat("textAlpha", 1.0f);
     Shader textShader = ResourceManager::GetShader("text");
     RenderText = new TextRenderer(textShader, textCharacters);
 
@@ -320,6 +329,27 @@ void Game::Update(float dt)
         star.Alpha = 1.0f - CloudAlpha;
         star.Size = glm::vec2((sin(glfwGetTime() * 2.0f + getRandomInt(1, 100)) + 1.0f) * 0.5f);
     }
+
+    typing += dt;
+    if (NameOutput.size() == Name.size() && !loopTextAnimation) {
+        RenderText->shader.Use().SetFloat("textAlpha", textAlpha);
+        textAlpha -= dt;
+        if (textAlpha <= 0.0f) {
+            loopTextAnimation = true;
+            textLenght = 0.0f;
+            textAlpha = 1.0f;
+            RenderText->shader.Use().SetFloat("textAlpha", 1.0f);
+        }
+    }
+    else if (typing >= typeSpeed && textLenght < Name.size())
+    {
+        ++textLenght;
+        typing = 0.0f;
+        if (textLenght == Name.size()) {
+            loopTextAnimation = false;
+        }
+    }
+    NameOutput = Name.substr(0, textLenght);
 }
 
 void Game::ProcessInput(float dt, float MouseX, float MouseY)
@@ -491,7 +521,7 @@ void Game::Render()
         ResourceManager::GetShader("moon").Use().SetInteger("hasTexture", -1);
         Tint->Draw(*MoonRenderer);
 
-        RenderText->RenderText(L"Staša Radojičić RA 62/2021", 25.0f, 45.0f, 0.6f, glm::vec3(0.0f, 0.0f, 0.0f));
+        RenderText->RenderText(NameOutput, 25.0f, 45.0f, 0.6f, glm::vec3(0.0f, 0.0f, 0.0f));
     }
 }
 
