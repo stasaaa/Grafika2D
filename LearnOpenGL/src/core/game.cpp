@@ -1,4 +1,4 @@
-#include <iostream>
+ï»¿#include <iostream>
 
 #include "game.h"
 #include "../graphics/sprite_renderer.h"
@@ -240,14 +240,14 @@ void Game::Update(float dt)
     }
 
     if (SunMoving) {
-        // Poveæajte ugao (pretvaranje stepena u radijane)
+        // PoveÄ‡ajte ugao (pretvaranje stepena u radijane)
         SunAngle += SunSpeed * dt * (3.14159f / 180.0f);
 
-        // Odravajte ugao u opsegu [0, 2]
+        // OdrÅ¾avajte ugao u opsegu [0, 2]
         if (SunAngle >= 2.0f * 3.14159f)
             SunAngle -= 2.0f * 3.14159f;
 
-        // Izraèunajte novu poziciju
+        // IzraÄunajte novu poziciju
         Sun->Position.x = RotationCenter.x - RotationRadius * sin(SunAngle);
         Sun->Position.y = RotationCenter.y - RotationRadius * cos(SunAngle);
 
@@ -491,7 +491,7 @@ void Game::Render()
         ResourceManager::GetShader("moon").Use().SetInteger("hasTexture", -1);
         Tint->Draw(*MoonRenderer);
 
-        RenderText->RenderText("Staša Radojièiæ RA 62/2021", 25.0f, 45.0f, 0.6f, glm::vec3(0.0f, 0.0f, 0.0f));
+        RenderText->RenderText(L"StaÅ¡a RadojiÄiÄ‡ RA 62/2021", 25.0f, 45.0f, 0.6f, glm::vec3(0.0f, 0.0f, 0.0f));
     }
 }
 

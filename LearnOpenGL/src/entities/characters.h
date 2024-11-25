@@ -7,7 +7,7 @@
 
 class Characters {
 public:
-	std::map<char, Character>	AllCharacters;
+	std::map<char32_t, Character>	AllCharacters;
 	Characters();
 	~Characters();
 };
