@@ -48,6 +48,7 @@ public:
     // game loop
     void ProcessInput(float dt, float MouseX, float MouseY);
     void Update(float dt);
+    void UpdatePositions(float newWidth, float newHeight);
     void Render();
 };
 

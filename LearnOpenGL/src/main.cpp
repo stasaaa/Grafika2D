@@ -180,6 +180,14 @@ int main() {
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
+    Breakout.UpdatePositions(width, height);
+    Breakout.Width = width;
+    Breakout.Height = height;
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(width),
+        static_cast<float>(height), 0.0f, -1.0f, 1.0f);
+    for (const auto& shaderPair : ResourceManager::Shaders) {
+        ResourceManager::GetShader(shaderPair.first).Use().SetMatrix4("projection", projection);
+    }
 }
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {

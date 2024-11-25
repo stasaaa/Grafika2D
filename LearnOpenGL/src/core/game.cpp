@@ -260,13 +260,13 @@ void Game::Update(float dt)
         Sun->Position.x = RotationCenter.x - RotationRadius * sin(SunAngle);
         Sun->Position.y = RotationCenter.y - RotationRadius * cos(SunAngle);
 
-        Moon->Position.x = RotationCenter.x - (RotationRadius + SUN_SIZE.x) * sin(SunAngle + 3.14159f);
-        Moon->Position.y = RotationCenter.y - (RotationRadius + SUN_SIZE.y) * cos(SunAngle + 3.14159f);
+        Moon->Position.x = RotationCenter.x - (RotationRadius + Sun->Size.x) * sin(SunAngle + 3.14159f);
+        Moon->Position.y = RotationCenter.y - (RotationRadius + Sun->Size.y) * cos(SunAngle + 3.14159f);
 
         const float tolerance = 0.01f;
 
         // Check if the Moon's Y position is near the highest point (with tolerance)
-        if (Moon->Position.y <= RotationCenter.y - (RotationRadius + SUN_SIZE.y) + tolerance
+        if (Moon->Position.y <= RotationCenter.y - (RotationRadius + Sun->Size.y) + tolerance
             || Sun->Position.y <= RotationCenter.y - RotationRadius + tolerance) {
             // Stop the Sun and Moon from moving when the Moon is at the top
             SunMoving = false;
@@ -352,6 +352,62 @@ void Game::Update(float dt)
     NameOutput = Name.substr(0, textLenght);
 }
 
+void Game::UpdatePositions(float newWidth, float newHeight)
+{
+    float scale = newHeight / this->Height;
+    float sizeDirection = -1.0f;
+    Player->Position = glm::vec2(
+        Player->Position.x / this->Width * newWidth,
+        Player->Position.y / this->Height * newHeight + this->Height / newHeight * 0.06
+    );
+    Player->Size = Player->Size * scale;
+
+    Sun->Position = glm::vec2(
+        Sun->Position.x / this->Width * newWidth,
+        Sun->Position.y / this->Height * newHeight
+    );
+    Sun->Size = Sun->Size * scale;
+
+    RotationRadius = newHeight / 2.0f;
+    RotationCenter = glm::vec2(newWidth / 2.0f, Sun->Position.y + RotationRadius);
+
+    Moon->Position = glm::vec2(
+        Moon->Position.x / this->Width * newWidth,
+        Moon->Position.y / this->Height * newHeight
+    );
+    Moon->Size = Moon->Size * scale;
+
+    for (GameObject& star : this->Stars) {
+        star.Position = glm::vec2(
+            star.Position.x / this->Width * newWidth,
+            star.Position.y / this->Height * newHeight
+        );
+        star.Size = star.Size * scale;
+    }
+
+    for (GameObject& cloud : this->Clouds) {
+        cloud.Position = glm::vec2(
+            cloud.Position.x / this->Width * newWidth,
+            cloud.Position.y / this->Height * newHeight
+        );
+        cloud.Size = cloud.Size * scale;
+    }
+
+    glm::vec2 treeOldPosition = Tree->Position;
+    Tree->Position = glm::vec2(
+        Tree->Position.x / this->Width * newWidth,
+        Tree->Position.y / this->Height * newHeight
+    );
+    Tree->Size = Tree->Size * scale;
+
+    for (GameObject& apple : this->Apples) {
+        glm::vec2 relativePosition = apple.Position - treeOldPosition;
+        relativePosition *= scale;
+        apple.Position = Tree->Position + relativePosition;
+        apple.Size = apple.Size * scale;
+    }
+}
+
 void Game::ProcessInput(float dt, float MouseX, float MouseY)
 {
     if (this->State == GAME_ACTIVE)
@@ -396,14 +452,16 @@ void Game::ProcessInput(float dt, float MouseX, float MouseY)
             }
         }
 
-        if (this->Keys[GLFW_KEY_N] && !(Moon->Position.y <= RotationCenter.y - (RotationRadius + SUN_SIZE.y) + 0.01)) {
+        if (this->Keys[GLFW_KEY_N] && !(Moon->Position.y <= RotationCenter.y - (RotationRadius + Sun->Size.y) + 0.01)) {
             SunMoving = true;
         }
 
-        if (this->Keys[GLFW_KEY_D] && (Moon->Position.y <= RotationCenter.y - (RotationRadius + SUN_SIZE.y) + 0.01)) {
+        if (this->Keys[GLFW_KEY_D] && (Moon->Position.y <= RotationCenter.y - (RotationRadius + Sun->Size.y) + 0.01)) {
             SunMoving = true;
         }
 
+        /*std::cout << "MouseX: " << MouseX << "  MouseY: " << MouseY << std::endl;
+        std::cout << "MoonX: " << Moon->Position.x << "  MoonY: " << Moon->Position.y << std::endl;*/
         if (this->MouseInput[GLFW_MOUSE_BUTTON_LEFT] && Moon->IsClicked(MouseX, MouseY) 
             && (redProgress == 0.0f || redProgress == 1.0f)) {
             MoonClicked = !MoonClicked;
@@ -520,6 +578,7 @@ void Game::Render()
         }
 
         ResourceManager::GetShader("moon").Use().SetInteger("hasTexture", -1);
+        Tint->Size = glm::vec2(this->Width, this->Height);
         Tint->Draw(*MoonRenderer);
 
         RenderText->RenderText(NameOutput, 25.0f, 45.0f, 0.6f, glm::vec3(0.0f, 0.0f, 0.0f));
