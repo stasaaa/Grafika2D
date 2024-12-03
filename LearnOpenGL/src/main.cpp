@@ -19,21 +19,16 @@ unsigned int SCREEN_HEIGHT = 700;
 Game Breakout(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 int main() {
-    //setlocale(LC_ALL, "en_US.UTF-8");
 	if (!glfwInit())
 	{
 		std::cout << "GLFW Biblioteka se nije ucitala! :(\n";
 		return 1;
 	}
 
-	// open gl version 3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
-	// use the core profile
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	//making window
 
 	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Learning OpenGL", NULL, NULL);
 	if (window == NULL) {
@@ -112,10 +107,6 @@ int main() {
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
 
-    FT_Set_Pixel_Sizes(face, 0, 48);
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
     // other functions
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     glfwSetKeyCallback(window, key_callback);
@@ -150,7 +141,6 @@ int main() {
         glfwGetCursorPos(window, &MouseX, &MouseY);
         Breakout.ProcessInput(deltaTime, MouseX, MouseY);
 
-        // ciscenje ekrana pre ctranja novih stvari
         glClear(GL_COLOR_BUFFER_BIT);
         Breakout.Update(deltaTime);
         Breakout.Render();
@@ -181,8 +171,6 @@ int main() {
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
     Breakout.UpdatePositions(width, height);
-    Breakout.Width = width;
-    Breakout.Height = height;
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(width),
         static_cast<float>(height), 0.0f, -1.0f, 1.0f);
     for (const auto& shaderPair : ResourceManager::Shaders) {
@@ -191,27 +179,14 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 }
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
-    // when a user presses the escape key, we set the WindowShouldClose property to true, closing the application
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     if (key >= 0 && key < 1024)
     {
         if (action == GLFW_PRESS) {
-            if (key == GLFW_KEY_KP_ADD) {
-                // Trigger the action for '+'
-                Breakout.Keys[key] = true; // Mark key as pressed
-            }
-            else if (key == GLFW_KEY_KP_SUBTRACT) {
-                // Trigger the action for '-'
-                Breakout.Keys[key] = true; // Mark key as pressed
-            }
-            else {
-                // Normal behavior for other keys
-                Breakout.Keys[key] = true;
-            }
+            Breakout.Keys[key] = true;
         }
         else if (action == GLFW_RELEASE) {
-            // Reset the key state on release
             Breakout.Keys[key] = false;
         }
     }

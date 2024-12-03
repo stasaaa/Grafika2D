@@ -22,21 +22,20 @@ float textLenght(0.0f);
 float textAlpha(1.0f);
 bool loopTextAnimation(false);
 
-// Initial size of the player paddle
 const glm::vec2 PLAYER_SIZE(60.0f, 100.0f);
-// Initial velocity of the player paddle
 const float PLAYER_VELOCITY(200.0f);
 
 const glm::vec2 SUN_SIZE(38.0f, 50.0f);
 const float PULSE(2.0f);
 
 glm::vec2 TREE_SIZE(300.0f, 400.0f);
+float whiteProgress(0.0f);
 
 bool SunMoving = false;
 float SunAngle = 0.0f;
 float SunSpeed = 50.0f;
 glm::vec2 RotationCenter;
-float RotationRadius = 200.0f;
+float RotationRadius;
 glm::vec3 SkyColorDay = glm::vec3(0.5f, 0.61f, 0.97f); // Light blue
 glm::vec3 SkyColorSunset = glm::vec3(1.0f, 0.5f, 0.2f); // Orange
 glm::vec3 SkyColorNight = glm::vec3(0.05f, 0.05f, 0.2f); // Dark blue
@@ -47,7 +46,7 @@ bool isNight = false;
 bool MoonClicked = false;
 bool RemoveRed = false;
 float redProgress = 0.0f;
-float SceneTint = 0.0f;   // 0.0f = no tint, 1.0f = full red tint
+float SceneTint = 0.0f;
 
 glm::vec3 CloudColor = glm::vec3(1.0f);
 float CloudAlpha = 1.0f;
@@ -106,6 +105,7 @@ void Game::Init(Characters& textCharacters)
 
     ResourceManager::GetShader("tree").Use().SetInteger("image", 0);
     ResourceManager::GetShader("tree").SetMatrix4("projection", projection);
+    ResourceManager::GetShader("tree").SetFloat("whiteProgress", whiteProgress);
     Shader treeShader = ResourceManager::GetShader("tree");
     TreeShader = new SpriteRenderer(treeShader);
 
@@ -134,41 +134,19 @@ void Game::Init(Characters& textCharacters)
     ResourceManager::LoadTexture("textures/sprites/apple_tree.png", true, "tree");
     ResourceManager::LoadTexture("textures/sprites/apple_1.png", true, "apple_1");
     ResourceManager::LoadTexture("textures/sprites/apple_2.png", true, "apple_2");
-    /*ResourceManager::LoadTexture("textures/backgrounds/background.jpg", false, "background");
-    ResourceManager::LoadTexture("textures/sprites/awesomeface.png", true, "face");
-    ResourceManager::LoadTexture("textures/sprites/block.png", false, "block");
-    ResourceManager::LoadTexture("textures/sprites/block_solid.png", false, "block_solid");
-    ResourceManager::LoadTexture("textures/sprites/paddle.png", true, "paddle");*/
-    // load levels
-    /*GameLevel one; one.Load("src/utils/levels/one.lvl", this->Width, this->Height / 2);
-    GameLevel two; two.Load("src/utils/levels/two.lvl", this->Width, this->Height / 2);
-    GameLevel three; three.Load("src/utils/levels/three.lvl", this->Width, this->Height / 2);
-    GameLevel four; four.Load("src/utils/levels/four.lvl", this->Width, this->Height / 2);
-    this->Levels.push_back(one);
-    this->Levels.push_back(two);
-    this->Levels.push_back(three);
-    this->Levels.push_back(four);
-    this->Level = 0;*/
 
-    // load player
     glm::vec2 playerPos = glm::vec2(
         2 * this->Width / 3.0f - PLAYER_SIZE.x / 2.0f,
         this->Height - PLAYER_SIZE.y - this->Height * 0.06f
     );
     Player = new GameObject(playerPos, PLAYER_SIZE, ResourceManager::GetTexture("monster"));
-    //Sun->Color = glm::vec3(0.5f, 0.61f, 0.97f); -- lepa plava boja
-
-    /*glm::vec2 treeTrunkPos = glm::vec2(
-        this->Width / 3.0f - 50.0f,
-
-    );*/
 
     this->LastCloud = glfwGetTime() - MIN_TIME_DIFF - 1;
     RotationRadius = this->Height / 2.0f ;
 
     glm::vec2 sunPos = glm::vec2(
         this->Width / 2.0f ,
-        this->Height - this->Height + SUN_SIZE.y * 2.0f
+        SUN_SIZE.y * 2.0f
     );
     Sun = new GameObject();
     Sun->Position = sunPos;
@@ -265,14 +243,12 @@ void Game::Update(float dt)
 
         const float tolerance = 0.01f;
 
-        // Check if the Moon's Y position is near the highest point (with tolerance)
         if (Moon->Position.y <= RotationCenter.y - (RotationRadius + Sun->Size.y) + tolerance
             || Sun->Position.y <= RotationCenter.y - RotationRadius + tolerance) {
-            // Stop the Sun and Moon from moving when the Moon is at the top
             SunMoving = false;
         }
 
-        float normalizedSunAngle = SunAngle / (2.0f * 3.14159f); // Normalize the sun angle
+        float normalizedSunAngle = SunAngle / (2.0f * 3.14159f);
 
         float cloudTransitionFactor = 0.0f;
 
@@ -301,23 +277,21 @@ void Game::Update(float dt)
             cloudTransitionFactor = 0.0f; // Clouds are fully visible and opaque
         }
 
-        //isNight = (normalizedSunAngle >= 0.30f && normalizedSunAngle < 0.75f) ? true : false;
-
-        CloudColor = glm::mix(glm::vec3(1.0f), glm::vec3(0.5f), cloudTransitionFactor); // Transition from white to gray
-        CloudAlpha = glm::mix(1.0f, 0.5f, cloudTransitionFactor); // Semi-transparent
+        CloudColor = glm::mix(glm::vec3(1.0f), glm::vec3(0.5f), cloudTransitionFactor);
+        CloudAlpha = glm::mix(1.0f, 0.5f, cloudTransitionFactor);
     }
 
     if (MoonClicked)
     {
-        redProgress += !RemoveRed ? 0.005 : -0.005; // Adjust speed as needed
+        redProgress += !RemoveRed ? 0.005 : -0.005;
         if (redProgress >= 1.0f) {
-            redProgress = 1.0f; // Clamp to max
-            MoonClicked = false; // Stop animation
+            redProgress = 1.0f;
+            MoonClicked = false;
             RemoveRed = true;
         }
         else if (redProgress < 0.0f) {
-            redProgress = 0.0f; // Clamp to max
-            MoonClicked = false; // Stop animation
+            redProgress = 0.0f;
+            MoonClicked = false;
             RemoveRed = false;
         }
         else {
@@ -354,6 +328,9 @@ void Game::Update(float dt)
 
 void Game::UpdatePositions(float newWidth, float newHeight)
 {
+    if (newHeight <= 100 || newWidth <= 100) {
+        return;
+    }
     float scale = newHeight / this->Height;
     float sizeDirection = -1.0f;
     Player->Position = glm::vec2(
@@ -406,6 +383,9 @@ void Game::UpdatePositions(float newWidth, float newHeight)
         apple.Position = Tree->Position + relativePosition;
         apple.Size = apple.Size * scale;
     }
+
+    this->Width = newWidth;
+    this->Height = newHeight;
 }
 
 void Game::ProcessInput(float dt, float MouseX, float MouseY)
@@ -452,7 +432,7 @@ void Game::ProcessInput(float dt, float MouseX, float MouseY)
             }
         }
 
-        if (this->Keys[GLFW_KEY_N] && !(Moon->Position.y <= RotationCenter.y - (RotationRadius + Sun->Size.y) + 0.01)) {
+        if (this->Keys[GLFW_KEY_N] && (Sun->Position.y <= RotationCenter.y - RotationRadius + 0.01)) {
             SunMoving = true;
         }
 
@@ -473,7 +453,7 @@ void Game::ProcessInput(float dt, float MouseX, float MouseY)
             }
         }
 
-        if (this->Keys[GLFW_KEY_UP] && Tree->Size.y <= this->Height) {
+        if (this->Keys[GLFW_KEY_W] && Tree->Size.y <= this->Height) {
             Tree->Size.y += 20.0f * dt;
             Tree->Position.y -= 20.0f * dt;
 
@@ -485,7 +465,7 @@ void Game::ProcessInput(float dt, float MouseX, float MouseY)
             }
         }
 
-        if (this->Keys[GLFW_KEY_DOWN] && Tree->Size.y >= this->Height - 400.0f) {
+        if (this->Keys[GLFW_KEY_S] && Tree->Size.y >= this->Height - 400.0f) {
             Tree->Size.y -= 20.0f * dt;
             Tree->Position.y += 20.0f * dt;
 
@@ -519,6 +499,25 @@ void Game::ProcessInput(float dt, float MouseX, float MouseY)
         if (this->Keys[GLFW_KEY_KP_SUBTRACT] && this->Apples.size() > 0) {
             this->Apples.pop_back();
             this->Keys[GLFW_KEY_KP_SUBTRACT] = false;
+        }
+
+        if (this->Keys[GLFW_KEY_UP]) {
+            if (whiteProgress >= 0.0f && whiteProgress < 0.20f) {
+                whiteProgress += 0.01f;
+                if (whiteProgress >= 0.20f) {
+                    whiteProgress = 0.20f;
+                }
+                ResourceManager::GetShader("tree").Use().SetFloat("whiteProgress", whiteProgress);
+            }
+        }
+        if (this->Keys[GLFW_KEY_DOWN]) {
+            if (whiteProgress <= 0.20f && whiteProgress > 0.0f) {
+                whiteProgress -= 0.01f;
+                if (whiteProgress <= 0.0f) {
+                    whiteProgress = 0.0f;
+                }
+                ResourceManager::GetShader("tree").Use().SetFloat("whiteProgress", whiteProgress);
+            }
         }
     }
 }
@@ -564,14 +563,12 @@ void Game::Render()
             cloud.Draw(*Renderer);
         }
 
-        // Draw player and other objects
         Player->Draw(*Renderer);
         Tree->Draw(*TreeShader);
 
         texOffset = glm::vec2(BackgroundLayers[BackgroundLayers.size() - 1].position.x / this->Width, 0.0f);
         Renderer->DrawSprite(BackgroundLayers[BackgroundLayers.size() - 1].texture,
             glm::vec2(0.0f, 0.0f), glm::vec2(this->Width, this->Height),1.0f, texOffset, texRepeat);
-
 
         for (GameObject apple : this->Apples) {
             apple.Draw(*Renderer);

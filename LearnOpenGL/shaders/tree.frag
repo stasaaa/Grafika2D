@@ -1,8 +1,10 @@
 #version 330 core
 
 in vec2 TexCoords; 
+out vec4 color; 
+
 uniform sampler2D texture1; 
-out vec4 FragColor; 
+uniform float whiteProgress;
 
 void main() {
     vec4 texColor = texture(texture1, TexCoords);
@@ -12,5 +14,10 @@ void main() {
         texColor.a = 0.5;
     }
 
-    FragColor = texColor;
+    if (TexCoords.y >= 1.0f - whiteProgress) {
+        color = mix(texColor, vec4(1.0f, 1.0f, 1.0f, texColor.a), 0.6f);
+        return;
+    }
+
+    color = texColor;
 }

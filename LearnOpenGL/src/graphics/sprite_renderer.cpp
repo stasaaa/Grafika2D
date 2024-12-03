@@ -31,7 +31,6 @@ void SpriteRenderer::DrawSprite(Texture2D& texture, glm::vec2 position, glm::vec
 
     this->shader.SetMatrix4("model", model);
 
-    // render textured quad
     this->shader.SetVector3f("spriteColor", color);
     this->shader.SetVector2f("textOffSet", texOffset);
     this->shader.SetVector2f("textRepeat", textRepeat);
