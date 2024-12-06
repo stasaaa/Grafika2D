@@ -39,7 +39,7 @@ float RotationRadius;
 glm::vec3 SkyColorDay = glm::vec3(0.5f, 0.61f, 0.97f); // Light blue
 glm::vec3 SkyColorSunset = glm::vec3(1.0f, 0.5f, 0.2f); // Orange
 glm::vec3 SkyColorNight = glm::vec3(0.05f, 0.05f, 0.2f); // Dark blue
-glm::vec3 SkyColorMorning = glm::vec3(1.0f, 0.8f, 0.6f); // Pink
+glm::vec3 SkyColorMorning = glm::vec3(1.0f, 0.6f, 0.7f); // Pastel pink
 glm::vec3 SkyColor = SkyColorDay;
 
 bool isNight = false;
@@ -394,49 +394,49 @@ void Game::ProcessInput(float dt, float MouseX, float MouseY)
     {
         float velocity = PLAYER_VELOCITY * dt;
 
-        if (this->Keys[GLFW_KEY_LEFT] && Player->Position.x > 0.0f) {
-            if (Player->Position.x >= 0.0f)
-                Player->Position.x -= velocity;
+        //if (this->Keys[GLFW_KEY_LEFT] && Player->Position.x > 0.0f) {
+        //    if (Player->Position.x >= 0.0f)
+        //        Player->Position.x -= velocity;
 
-            Tree->Position.x += 60.0f * dt;
-            for (GameObject& apple : this->Apples) {
-                apple.Position.x += 60.0f * dt;
-            }
-            // Update background layers
-            for (auto& layer : BackgroundLayers) {
-                layer.position.x -= layer.velocity * dt;
+        //    Tree->Position.x += 60.0f * dt;
+        //    for (GameObject& apple : this->Apples) {
+        //        apple.Position.x += 60.0f * dt;
+        //    }
+        //    // Update background layers
+        //    for (auto& layer : BackgroundLayers) {
+        //        layer.position.x -= layer.velocity * dt;
 
-                // Wrap the position when it goes out of bounds
-                if (layer.position.x <= -static_cast<float>(this->Width)) {
-                    layer.position.x += static_cast<float>(this->Width);
-                }
-            }
-        }
+        //        // Wrap the position when it goes out of bounds
+        //        if (layer.position.x <= -static_cast<float>(this->Width)) {
+        //            layer.position.x += static_cast<float>(this->Width);
+        //        }
+        //    }
+        //}
 
-        if (this->Keys[GLFW_KEY_RIGHT] && Player->Position.x < this->Width - Player->Size.x) {
-            if (Player->Position.x <= this->Width - Player->Size.x)
-                Player->Position.x += velocity;
+        //if (this->Keys[GLFW_KEY_RIGHT] && Player->Position.x < this->Width - Player->Size.x) {
+        //    if (Player->Position.x <= this->Width - Player->Size.x)
+        //        Player->Position.x += velocity;
 
-            Tree->Position.x -= 60.0f * dt;
-            for (GameObject& apple : this->Apples) {
-                apple.Position.x -= 60.0f * dt;
-            }
-            // Update background layers
-            for (auto& layer : BackgroundLayers) {
-                layer.position.x += layer.velocity * dt;
+        //    Tree->Position.x -= 60.0f * dt;
+        //    for (GameObject& apple : this->Apples) {
+        //        apple.Position.x -= 60.0f * dt;
+        //    }
+        //    // Update background layers
+        //    for (auto& layer : BackgroundLayers) {
+        //        layer.position.x += layer.velocity * dt;
 
-                // Wrap the position when it goes out of bounds
-                if (layer.position.x >= static_cast<float>(this->Width)) {
-                    layer.position.x -= static_cast<float>(this->Width);
-                }
-            }
-        }
+        //        // Wrap the position when it goes out of bounds
+        //        if (layer.position.x >= static_cast<float>(this->Width)) {
+        //            layer.position.x -= static_cast<float>(this->Width);
+        //        }
+        //    }
+        //}
 
         if (this->Keys[GLFW_KEY_N] && (Sun->Position.y <= RotationCenter.y - RotationRadius + 0.01)) {
             SunMoving = true;
         }
 
-        if (this->Keys[GLFW_KEY_D] && (Moon->Position.y <= RotationCenter.y - (RotationRadius + Sun->Size.y) + 0.01)) {
+        if (this->Keys[GLFW_KEY_D] && (Moon->Position.y <= RotationCenter.y - (RotationRadius + Sun->Size.y) + 5)) {
             SunMoving = true;
         }
 
@@ -453,7 +453,7 @@ void Game::ProcessInput(float dt, float MouseX, float MouseY)
             }
         }
 
-        if (this->Keys[GLFW_KEY_W] && Tree->Size.y <= this->Height) {
+        /*if (this->Keys[GLFW_KEY_W] && Tree->Size.y <= this->Height) {
             Tree->Size.y += 20.0f * dt;
             Tree->Position.y -= 20.0f * dt;
 
@@ -475,7 +475,7 @@ void Game::ProcessInput(float dt, float MouseX, float MouseY)
 
                 apple.Position.y += (20.0f * dt) * (1.0f - relativePosition);
             }
-        }
+        }*/
 
         if (this->Keys[GLFW_KEY_KP_ADD] && this->Apples.size() < 10) {
             float canopyTopY = Tree->Position.y;
@@ -563,7 +563,7 @@ void Game::Render()
             cloud.Draw(*Renderer);
         }
 
-        Player->Draw(*Renderer);
+        //Player->Draw(*Renderer);
         Tree->Draw(*TreeShader);
 
         texOffset = glm::vec2(BackgroundLayers[BackgroundLayers.size() - 1].position.x / this->Width, 0.0f);

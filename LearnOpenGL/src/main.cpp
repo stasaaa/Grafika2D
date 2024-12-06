@@ -1,4 +1,6 @@
 #include <iostream>
+#include <chrono>
+#include <thread>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -8,6 +10,9 @@
 #include "core/Game.h"
 #include "core/resource_manager.h"
 #include "entities/characters.h"
+
+const int TARGET_FPS = 60;
+const double TARGET_FRAME_TIME = 1.0 / TARGET_FPS;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -128,14 +133,21 @@ int main() {
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
 
+    int frame = 0;
+
     while (!glfwWindowShouldClose(window)) {
         //double frameStart = glfwGetTime();
         // calculate delta time
         // --------------------
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
 
+        //std::cout << "Frame: " << frame++ << "\tDelat time: " << deltaTime << std::endl;
+
+        if (deltaTime < TARGET_FRAME_TIME) {
+            //std::cout << "Delta time: " << deltaTime << "\tSleep for: " << static_cast<int>((TARGET_FRAME_TIME - deltaTime) * 1000) << std::endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>((TARGET_FRAME_TIME - deltaTime) * 1000)));
+        }
 
         double MouseX, MouseY;
         glfwGetCursorPos(window, &MouseX, &MouseY);
@@ -149,13 +161,7 @@ int main() {
         glfwSwapBuffers(window);
         glfwPollEvents();
 
-        // limit to 60 fps
-        /*double targetDuration = 1.0 / 60.0;
-        double frameDuration = glfwGetTime() - frameStart;
-
-        if (frameDuration < targetDuration) {
-            std::this_thread::sleep_for(std::chrono::duration<double>(targetDuration - frameDuration));
-        }*/
+        lastFrame = currentFrame;
     }
 
     // delete all resources as loaded using the resource manager
